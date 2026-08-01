@@ -10,12 +10,17 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 
 const app = express();
 
+// CI/CD testing
 // Middleware
 app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGO_URI || "mongodb://localhost:27017/attendanceDB")
+mongoose.connect(
+ process.env.MONGO_URI || "mongodb://attendance-mongodb:27017/attendanceDB"
+)
+.then(() => console.log("MongoDB Connected"))
+.catch(err => console.log(err))
 .then(() => {
     console.log("✅ MongoDB Connected");
 })
