@@ -5,7 +5,6 @@ pipeline {
     environment {
 
         IMAGE_NAME = "attendance-app"
-
         CONTAINER_NAME = "attendance"
 
     }
@@ -31,9 +30,11 @@ pipeline {
 
             steps {
 
+                echo "Installing Node dependencies"
+
                 dir('backend') {
 
-                    bat 'npm install'
+                    sh 'npm install'
 
                 }
 
@@ -46,9 +47,11 @@ pipeline {
 
             steps {
 
+                echo "Building Docker Image"
+
                 dir('backend') {
 
-                    bat 'docker build -t %IMAGE_NAME% .'
+                    sh 'docker build -t $IMAGE_NAME .'
 
                 }
 
@@ -57,13 +60,15 @@ pipeline {
         }
 
 
-        stage('Stop Old Container') {
+        stage('Stop Existing Container') {
 
             steps {
 
-                bat '''
-                docker stop %CONTAINER_NAME% || exit 0
-                docker rm %CONTAINER_NAME% || exit 0
+                echo "Stopping old container"
+
+                sh '''
+                docker stop $CONTAINER_NAME || true
+                docker rm $CONTAINER_NAME || true
                 '''
 
             }
@@ -71,13 +76,31 @@ pipeline {
         }
 
 
-        stage('Run Docker Container') {
+        stage('Run New Container') {
 
             steps {
 
-                bat '''
-                docker run -d -p 5000:5000 --name %CONTAINER_NAME% %IMAGE_NAME%
+                echo "Starting new container"
+
+                sh '''
+                docker run -d \
+                -p 5000:5000 \
+                --name $CONTAINER_NAME \
+                $IMAGE_NAME
                 '''
+
+            }
+
+        }
+
+
+        stage('Check Container') {
+
+            steps {
+
+                echo "Checking running container"
+
+                sh 'docker ps'
 
             }
 
@@ -88,18 +111,26 @@ pipeline {
 
     post {
 
+
         success {
 
+            echo "================================"
             echo "Deployment Successful!"
+            echo "Attendance System is Running"
+            echo "================================"
 
         }
 
 
         failure {
 
+            echo "================================"
             echo "Deployment Failed!"
+            echo "Check Console Output"
+            echo "================================"
 
         }
+
 
     }
 
