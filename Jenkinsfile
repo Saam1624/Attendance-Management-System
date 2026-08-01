@@ -3,68 +3,33 @@ pipeline {
     agent any
 
     environment {
-
         IMAGE_NAME = "attendance-app"
         CONTAINER_NAME = "attendance"
-
     }
-
 
     stages {
 
-
         stage('Checkout') {
-
             steps {
-
                 echo "Pulling code from GitHub"
-
                 checkout scm
-
             }
-
-        }
-
-
-        stage('Install Dependencies') {
-
-            steps {
-
-                echo "Installing Node dependencies"
-
-                dir('backend') {
-
-                    sh 'npm install'
-
-                }
-
-            }
-
         }
 
 
         stage('Build Docker Image') {
-
             steps {
-
                 echo "Building Docker Image"
 
                 dir('backend') {
-
                     sh 'docker build -t $IMAGE_NAME .'
-
                 }
-
             }
-
         }
 
 
         stage('Stop Existing Container') {
-
             steps {
-
-                echo "Stopping old container"
 
                 sh '''
                 docker stop $CONTAINER_NAME || true
@@ -72,15 +37,11 @@ pipeline {
                 '''
 
             }
-
         }
 
 
         stage('Run New Container') {
-
             steps {
-
-                echo "Starting new container"
 
                 sh '''
                 docker run -d \
@@ -90,20 +51,15 @@ pipeline {
                 '''
 
             }
-
         }
 
 
         stage('Check Container') {
-
             steps {
-
-                echo "Checking running container"
 
                 sh 'docker ps'
 
             }
-
         }
 
     }
@@ -111,26 +67,13 @@ pipeline {
 
     post {
 
-
         success {
-
-            echo "================================"
             echo "Deployment Successful!"
-            echo "Attendance System is Running"
-            echo "================================"
-
         }
-
 
         failure {
-
-            echo "================================"
             echo "Deployment Failed!"
-            echo "Check Console Output"
-            echo "================================"
-
         }
-
 
     }
 
