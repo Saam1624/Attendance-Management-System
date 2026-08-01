@@ -2,77 +2,74 @@ pipeline {
 
     agent any
 
-    environment {
-        IMAGE_NAME = "attendance-app"
-        CONTAINER_NAME = "attendance"
-    }
-
     stages {
 
         stage('Checkout') {
             steps {
-                echo "Pulling code from GitHub"
+                echo 'Pulling code from GitHub'
                 checkout scm
             }
         }
 
 
-        stage('Build Docker Image') {
+        stage('Build Docker Compose') {
             steps {
-                echo "Building Docker Image"
+                echo 'Building Docker Images'
 
-                dir('backend') {
-                    sh 'docker build -t $IMAGE_NAME .'
-                }
+                sh '''
+                docker compose build
+                '''
             }
         }
 
 
-       stage('Stop Existing Container') {
-    steps {
-        sh '''
-        docker stop attendance || true
-        docker rm attendance || true
-        '''
-    }
-}
-
-
-  stage('Run New Container') {
-    steps {
-        sh '''
-        docker run -d \
-        -p 5000:5000 \
-        --name attendance \
-        --network attendance-network \
-        -e MONGO_URI=mongodb://attendance-mongodb:27017/attendanceDB \
-        attendance-app
-        '''
-    }
-}
-
-
-        stage('Check Container') {
+        stage('Stop Existing Containers') {
             steps {
+                echo 'Stopping old containers'
 
-                sh 'docker ps'
-
+                sh '''
+                docker compose down
+                '''
             }
         }
 
+
+        stage('Deploy Application') {
+            steps {
+                echo 'Starting application'
+
+                sh '''
+                docker compose up -d
+                '''
+            }
+        }
+
+
+        stage('Check Deployment') {
+            steps {
+                echo 'Checking running containers'
+
+                sh '''
+                docker ps
+                '''
+            }
+        }
     }
 
 
     post {
 
         success {
-            echo "Deployment Successful!"
+            echo '================================'
+            echo 'Deployment Successful!'
+            echo '================================'
         }
 
         failure {
-            echo "Deployment Failed!"
+            echo '================================'
+            echo 'Deployment Failed!'
+            echo '================================'
         }
 
     }
-
 }
