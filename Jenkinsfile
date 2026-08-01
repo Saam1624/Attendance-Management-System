@@ -28,30 +28,28 @@ pipeline {
         }
 
 
-        stage('Stop Existing Container') {
-            steps {
-
-                sh '''
-                docker stop $CONTAINER_NAME || true
-                docker rm $CONTAINER_NAME || true
-                '''
-
-            }
-        }
+       stage('Stop Existing Container') {
+    steps {
+        sh '''
+        docker stop attendance || true
+        docker rm attendance || true
+        '''
+    }
+}
 
 
-        stage('Run New Container') {
-            steps {
-
-                sh '''
-                docker run -d \
-                -p 5000:5000 \
-                --name $CONTAINER_NAME \
-                $IMAGE_NAME
-                '''
-
-            }
-        }
+  stage('Run New Container') {
+    steps {
+        sh '''
+        docker run -d \
+        -p 5000:5000 \
+        --name attendance \
+        --network attendance-network \
+        -e MONGO_URI=mongodb://attendance-mongodb:27017/attendanceDB \
+        attendance-app
+        '''
+    }
+}
 
 
         stage('Check Container') {
