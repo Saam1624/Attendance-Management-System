@@ -17,7 +17,7 @@ pipeline {
                 echo 'Building Docker Images'
 
                 sh '''
-                docker compose build
+                docker-compose build
                 '''
             }
         }
@@ -28,7 +28,7 @@ pipeline {
                 echo 'Stopping old containers'
 
                 sh '''
-                docker compose down
+                docker-compose down
                 '''
             }
         }
@@ -39,7 +39,7 @@ pipeline {
                 echo 'Starting application'
 
                 sh '''
-                docker compose up -d
+                docker-compose up -d
                 '''
             }
         }
